@@ -1,6 +1,6 @@
 # CFIRSTNET: Comprehensive Features for Static IR Drop Estimation with Neural Network
 
-Official implementation of **CFIRSTNET: Comprehensive Features for Static IR Drop Estimation with Neural Network.**
+Official implementation of **[CFIRSTNET: Comprehensive Features for Static IR Drop Estimation with Neural Network](<https://arxiv.org/abs/2502.12168>)**.
 <p align='center'>
 <td style='text-align:center;'>
   <img src=https://github.com/jason122490/CFIRSTNET/blob/main/figures/flow.png >
