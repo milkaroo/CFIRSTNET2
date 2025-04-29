@@ -3,7 +3,7 @@ import torch.nn.functional as F
 
 from timm import create_model
 
-from layers import AddCoords, Conv2dNormAct
+from src.layers import AddCoords, Conv2dNormAct
 
 class Head(nn.Module):
     def __init__(
