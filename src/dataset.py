@@ -5,7 +5,7 @@ import pandas as pd
 from dataclasses import dataclass
 import cv2
 
-from data_preprocess import ICCAD_Data
+from src.data_preprocess import ICCAD_Data
 
 pd.options.mode.chained_assignment = None
 
