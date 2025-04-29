@@ -1,5 +1,5 @@
 from functools import partial
-ㅍㅍ
+
 import time
 import pickle
 import argparse
@@ -80,13 +80,13 @@ if __name__ == '__main__':
 
     in_channels = args.use_PDN + args.use_dist + args.use_current + args.use_HIRD * (metal_num * 2 - 1) + args.use_WR * (metal_num * 2 - 3) + args.use_RD * (metal_num * 2 - 3)
 
-    if args.interpolation is 'area':
+    if args.interpolation == 'area':
         interpolation = cv2.INTER_AREA
-    elif args.interpolation is 'linear':
+    elif args.interpolation == 'linear':
         interpolation = cv2.INTER_LINEAR
-    elif args.interpolation is 'cubic':
+    elif args.interpolation == 'cubic':
         interpolation = cv2.INTER_CUBIC
-    elif args.interpolation is 'nearest':
+    elif args.interpolation == 'nearest':
         interpolation = cv2.INTER_NEAREST
     else:
         raise ValueError('Invalid interpolation method')
