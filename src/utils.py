@@ -11,8 +11,8 @@ from tqdm import tqdm
 from datasets import Dataset
 from torch.utils.data import default_collate
 
-from loss import *
-from metrics import *
+from src.loss import *
+from src.metrics import *
 
 def seed_everything(seed):
     os.environ["PYTHONHASHSEED"] = str(seed)
