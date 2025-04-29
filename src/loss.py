@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from transforms import reverse_normalize
+from src.transforms import reverse_normalize
 
 def smooth_f1_loss(input, target, beta, epsilon):
     TP = (input * target).sum()
