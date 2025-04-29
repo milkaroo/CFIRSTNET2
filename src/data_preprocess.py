@@ -6,7 +6,7 @@ from numpy import genfromtxt
 import cv2
 import albumentations as A
 
-import libdata
+import src.libdata
 
 class ICCAD_Data():
     def __init__(
