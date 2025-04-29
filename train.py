@@ -12,7 +12,7 @@ from torch.backends import cuda
 import wandb
 import cv2
 
-from datasets import load_dataset
+from src.datasets import load_dataset
 
 from src.transforms import *
 from src.utils import *
