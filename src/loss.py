@@ -25,6 +25,9 @@ class SmoothF1Loss(nn.Module):
         loss = torch.zeros(0).to(input.device)
         self.std = self.std.to(input.device)
 
+        if target.dim() == 3:
+          target = target.unsqueeze(1)
+          
         for input, target in zip(input, target):
             H, W = target.shape[-2:]
             input = reverse_normalize(input, H=H, W=W)
