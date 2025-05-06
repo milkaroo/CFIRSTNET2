@@ -15,14 +15,14 @@ _URLS = {
     'fake_data_url': f'{_REPO}/fake-circuit-data_20230623.zip',
     'real_data_url': f'{_REPO}/real-circuit-data_20230615.zip',
     'test_data_url': f'{_REPO}/hidden-real-circuit-data.zip',
-    'BeGAN_01_data_url': f'{_REPO}/BeGAN-ver01.zip',
-    'BeGAN_02_data_url': f'{_REPO}/BeGAN-ver02.zip',
+    #'BeGAN_01_data_url': f'{_REPO}/BeGAN-ver01.zip',
+    #'BeGAN_02_data_url': f'{_REPO}/BeGAN-ver02.zip',
 }
 
 @dataclass
 class ICCAD_Config(datasets.BuilderConfig):
     test_mode: bool = False
-    use_BeGAN: bool = False and not test_mode
+    use_BeGAN: bool = False
     
     # transform
     img_size: int = 384
@@ -56,6 +56,9 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
         )
        
     def _split_generators(self, dl_manager):
+        import random
+        SAMPLE_PER_SPLIT = 100   # 각 split당 최대 샘플 개수
+        SEED = 42                # reproducibility
         test_idx = []
         test_cur = []
         test_pdn = []
@@ -77,19 +80,6 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
         fake_ir_drop = []
         fake_netlist = []
         
-        BeGAN_01_idx = []
-        BeGAN_01_cur = []
-        BeGAN_01_pdn = []
-        BeGAN_01_dist = []
-        BeGAN_01_ir_drop = []
-        BeGAN_01_netlist = []
-
-        BeGAN_02_idx = []
-        BeGAN_02_cur = []
-        BeGAN_02_pdn = []
-        BeGAN_02_dist = []
-        BeGAN_02_ir_drop = []
-        BeGAN_02_netlist = []
         
         # Download images
         test_data_files = os.path.join(dl_manager.download_and_extract(_URLS['test_data_url']), 'hidden-real-circuit-data')
@@ -103,13 +93,7 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
             fake_data_files = os.path.join(dl_manager.download_and_extract(_URLS['fake_data_url']), 'fake-circuit-data_20230623')
             fake_path_files = sorted(glob.glob(os.path.join(fake_data_files, '*.sp')))
         
-        if self.config.use_BeGAN and not self.config.test_mode:
-            BeGAN_01_data_files = os.path.join(dl_manager.download_and_extract(_URLS['BeGAN_01_data_url']), 'BeGAN-ver01')
-            BeGAN_01_path_files = sorted(glob.glob(os.path.join(BeGAN_01_data_files, '*.sp')))
-
-            BeGAN_02_data_files = os.path.join(dl_manager.download_and_extract(_URLS['BeGAN_02_data_url']), 'BeGAN-ver02')
-            BeGAN_02_path_files = sorted(glob.glob(os.path.join(BeGAN_02_data_files, '*.sp')))
-        
+      
         # for test
         for path in test_path_files:
             data_idx = os.path.basename(path)
@@ -132,6 +116,32 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                 
             assert len(test_idx) == len(test_cur) == len(test_dist) == len(test_ir_drop) == len(test_pdn) == len(test_netlist), f'{(len(test_idx), len(test_cur), len(test_dist), len(test_ir_drop), len(test_pdn), len(test_netlist))} test data length not the same'
         
+        # ────────────── 샘플링 로직 ──────────────
+        # helper: idx 리스트와 여러 feature 리스트를 같은 인덱스로 필터
+        def sample_lists(idxs, *lists):
+            total = len(idxs)
+            k = min(SAMPLE_PER_SPLIT, total)
+            rng = random.Random(SEED)
+            indices = list(range(total))
+            rng.shuffle(indices)
+            sel = set(indices[:k])
+            # filter each list
+            return (
+                [idxs[i]         for i in sorted(sel)],
+                *[
+                    [lst[i] for i in sorted(sel)]
+                    for lst in lists
+                ]
+            )
+        # test split 샘플링
+        (test_idx,
+         test_cur,
+         test_pdn,
+         test_dist,
+         test_ir_drop,
+         test_netlist) = sample_lists(
+        test_idx, test_cur, test_pdn, test_dist, test_ir_drop, test_netlist
+        )
         # for real
         if not self.config.test_mode:
             for path in real_path_files:
@@ -154,7 +164,15 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                         raise AssertionError(os.path.basename(data), 'real data path error')
                     
             assert len(real_idx) == len(real_cur) == len(real_dist) == len(real_ir_drop) == len(real_pdn) == len(real_netlist), f'{(len(real_idx), len(real_cur), len(real_dist), len(real_ir_drop), len(real_pdn), len(real_netlist))} real data length not the same'
-        
+        # real split 샘플링
+            (real_idx,
+             real_cur,
+             real_pdn,
+             real_dist,
+             real_ir_drop,
+             real_netlist) = sample_lists(
+                 real_idx, real_cur, real_pdn, real_dist, real_ir_drop, real_netlist
+            )
         # for fake
         if not self.config.test_mode:
             for path in fake_path_files:
@@ -177,52 +195,15 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                         raise AssertionError(os.path.basename(data), 'fake data path error')
 
             assert len(fake_idx) == len(fake_cur) == len(fake_dist) == len(fake_ir_drop) == len(fake_pdn) == len(fake_netlist), f'{(len(fake_idx), len(fake_cur), len(fake_dist), len(fake_ir_drop), len(fake_pdn), len(fake_netlist))} fake data length not the same'
-
-        if self.config.use_BeGAN and not self.config.test_mode:
-            # for BeGAN-ver01
-            for path in BeGAN_01_path_files:
-                data_idx = os.path.basename(path).split('.')[0]
-                BeGAN_01_idx.append(data_idx)
-                data_path = glob.glob(os.path.join(os.path.dirname(path), data_idx + '*.*'))
-
-                for data in data_path:
-                    if 'current.csv' in os.path.basename(data):
-                        BeGAN_01_cur.append(data)
-                    elif 'eff_dist.csv' in os.path.basename(data):
-                        BeGAN_01_dist.append(data)
-                    elif 'ir_drop_map.csv' in os.path.basename(data):
-                        BeGAN_01_ir_drop.append(data)
-                    elif 'pdn_density.csv' in os.path.basename(data):
-                        BeGAN_01_pdn.append(data)
-                    elif '.sp' in os.path.basename(data):
-                        BeGAN_01_netlist.append(data)
-                    else:
-                        raise AssertionError(os.path.basename(data), 'BeGAN-ver01 data path error')
-
-            assert len(BeGAN_01_idx) == len(BeGAN_01_cur) == len(BeGAN_01_dist) == len(BeGAN_01_ir_drop) == len(BeGAN_01_pdn) == len(BeGAN_01_netlist), f'{(len(BeGAN_01_idx), len(BeGAN_01_cur), len(BeGAN_01_dist), len(BeGAN_01_ir_drop), len(BeGAN_01_pdn), len(BeGAN_01_netlist))} BeGAN-ver02 data length not the same'
-
-            # for BeGAN-ver02
-            for path in BeGAN_02_path_files:
-                data_idx = os.path.basename(path).split('.')[0]
-                BeGAN_02_idx.append(data_idx)
-                data_path = glob.glob(os.path.join(os.path.dirname(path), data_idx + '*.*'))
-
-                for data in data_path:
-                    if 'current.csv' in os.path.basename(data):
-                        BeGAN_02_cur.append(data)
-                    elif 'eff_dist.csv' in os.path.basename(data):
-                        BeGAN_02_dist.append(data)
-                    elif 'voltage.csv' in os.path.basename(data):
-                        BeGAN_02_ir_drop.append(data)
-                    elif 'regions.csv' in os.path.basename(data):
-                        BeGAN_02_pdn.append(data)
-                    elif '.sp' in os.path.basename(data):
-                        BeGAN_02_netlist.append(data)
-                    else:
-                        raise AssertionError(os.path.basename(data), 'BeGAN-ver01 data path error')
-
-            assert len(BeGAN_02_idx) == len(BeGAN_02_cur) == len(BeGAN_02_dist) == len(BeGAN_02_ir_drop) == len(BeGAN_02_pdn) == len(BeGAN_02_netlist), f'{(len(BeGAN_02_idx), len(BeGAN_02_cur), len(BeGAN_02_dist), len(BeGAN_02_ir_drop), len(BeGAN_02_pdn), len(BeGAN_02_netlist))} BeGAN-ver01 data length not the same'
-        
+            # fake split 샘플링
+            (fake_idx,
+             fake_cur,
+             fake_pdn,
+             fake_dist,
+             fake_ir_drop,
+             fake_netlist) = sample_lists(
+                 fake_idx, fake_cur, fake_pdn, fake_dist, fake_ir_drop, fake_netlist
+            )
         if self.config.test_mode:
             return [datasets.SplitGenerator(
                     name=datasets.Split('test'),
@@ -235,27 +216,7 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                         'netlist': test_netlist,
                     })]
         else:
-            return ([datasets.SplitGenerator(
-                    name=datasets.Split('BeGAN_01'),
-                    gen_kwargs={
-                        'data_idx': BeGAN_01_idx,
-                        'current': BeGAN_01_cur,
-                        'pdn_density': BeGAN_01_pdn,
-                        'eff_dist': BeGAN_01_dist,
-                        'ir_drop': BeGAN_01_ir_drop,
-                        'netlist': BeGAN_01_netlist,
-                    }), datasets.SplitGenerator(
-                    name=datasets.Split('BeGAN_02'),
-                    gen_kwargs={
-                        'data_idx': BeGAN_02_idx,
-                        'current': BeGAN_02_cur,
-                        'pdn_density': BeGAN_02_pdn,
-                        'eff_dist': BeGAN_02_dist,
-                        'ir_drop': BeGAN_02_ir_drop,
-                        'netlist': BeGAN_02_netlist,
-                    })
-                ] if self.config.use_BeGAN else []
-                ) + [datasets.SplitGenerator(
+            return [datasets.SplitGenerator(
                     name=datasets.Split('fake'),
                     gen_kwargs={
                         'data_idx': fake_idx,
