@@ -3,7 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 
 from torcheval.metrics.functional import binary_f1_score, binary_recall, binary_precision
-from src.transforms import reverse_normalize
+from src.transforms import reverse_normalize as reverse_transform
 
 def single_f1_score(input, target):
     # CHW or HW
