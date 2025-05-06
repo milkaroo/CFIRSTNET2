@@ -29,13 +29,13 @@ if __name__ == '__main__':
     parser.add_argument('--name', type=str, default='convnextv2_tiny_CF_BeGAN', help='experiemnt name')
 
     parser.add_argument('--epochs', type=int, default=100, help='number of training epochs')
-    parser.add_argument('--use_BeGAN', type=bool, default=True, help='use BeGAN dataset')
+    #parser.add_argument('--use_BeGAN', type=bool, default=True, help='use BeGAN dataset')
 
     parser.add_argument('--img_size', type=int, default=384, help='image size')
     parser.add_argument('--interpolation', type=str, default='area', help='interpolation method, options:[area, linear, cubic, nearest]')
 
-    parser.add_argument('--use_PDN', type=bool, default=True, help='use PDN density map')
-    parser.add_argument('--use_dist', type=bool, default=True, help='use effective distance map')
+    parser.add_argument('--use_PDN', type=bool, default=False, help='use PDN density map')
+    parser.add_argument('--use_dist', type=bool, default=False, help='use effective distance map')
     parser.add_argument('--use_current', type=bool, default=False, help='use current map')
     parser.add_argument('--use_HIRD', type=bool, default=True, help='use Hypothetical IR Drop map')
     parser.add_argument('--use_WR', type=bool, default=True, help='use Wire Resistance map')
@@ -78,7 +78,8 @@ if __name__ == '__main__':
     if len(metal_orient) != metal_num or metal_orient.count(0) > 0:
         raise ValueError('Invalid metal definition')
 
-    in_channels = args.use_PDN + args.use_dist + args.use_current + args.use_HIRD * (metal_num * 2 - 1) + args.use_WR * (metal_num * 2 - 3) + args.use_RD * (metal_num * 2 - 3)
+    #in_channels = args.use_PDN + args.use_dist + args.use_current + args.use_HIRD * (metal_num * 2 - 1) + args.use_WR * (metal_num * 2 - 3) + args.use_RD * (metal_num * 2 - 3)
+    
 
     if args.interpolation == 'area':
         interpolation = cv2.INTER_AREA
@@ -114,12 +115,12 @@ if __name__ == '__main__':
     train_dataset = load_dataset(
         path = 'dataset.py',
         test_mode = False,
-        use_BeGAN = args.use_BeGAN,
+        #use_BeGAN = args.use_BeGAN,
         
         img_size = args.img_size,
         interpolation = interpolation,
         
-        split = 'fake+BeGAN_01+BeGAN_02',
+        split = 'fake',
         num_proc = args.num_workers,
         keep_in_memory = False,
         writer_batch_size = 10,
@@ -127,12 +128,13 @@ if __name__ == '__main__':
     )
     train_dataset = train_dataset.with_format('numpy')
     train_dataset = train_dataset.map(data_mapping, batched=True, batch_size=1, num_proc=args.num_workers, remove_columns=train_dataset.column_names)
-
-
+    in_channels = train_dataset[0]['image'].shape[0]
+    args.in_channels = in_channels
+    
     valid_dataset = load_dataset(
         path = 'dataset.py',
         test_mode = False,
-        use_BeGAN = args.use_BeGAN,
+        #use_BeGAN = args.use_BeGAN,
         
         img_size = args.img_size,
         interpolation = interpolation,
@@ -150,7 +152,7 @@ if __name__ == '__main__':
     test_dataset = load_dataset(
         path = 'dataset.py',
         test_mode = False,
-        use_BeGAN = args.use_BeGAN,
+        #use_BeGAN = args.use_BeGAN,
         
         img_size = args.img_size,
         interpolation = interpolation,
@@ -169,7 +171,8 @@ if __name__ == '__main__':
             min, max, mean, std = pickle.load(f)
         print('Load cache Successfully')
     except:
-        min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[in_channels, 1], data_keys=['image', 'ir_drop'])
+        #min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[in_channels, 1], data_keys=['image', 'ir_drop'])
+        min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[train_dataset[0]['image'].shape[0], 1], data_keys=['image', 'ir_drop'])
         with open('min_max_mean_std.cache', 'wb') as f:
             pickle.dump((min, max, mean, std), f)
 
