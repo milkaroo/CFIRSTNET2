@@ -17,7 +17,7 @@ def reverse_normalize(batch, mean=None, std=None, H=None, W=None, mode="bicubic"
         batch = batch + mean
     if H is not None and W is not None:
         if batch.dim() == 2:
-            batch = batch.unsqueeze(0, 1)
+            batch = batch.unsqueeze(0).unsqueeze(0)
         elif batch.dim() == 3:
             batch = batch.unsqueeze(0)
         
