@@ -67,6 +67,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--save_model', type=bool, default=True, help='save best MAE model in validation set')
     parser.add_argument('--save_dir', type=str, default='checkpoints', help='save directory')
+    parser.add_argument('--save_best_model', action='store_true', help='Save the best model based on validation performance')
 
     args = parser.parse_args()
 
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     train_dataset = train_dataset.map(data_mapping, batched=True, batch_size=1, num_proc=args.num_workers, remove_columns=train_dataset.column_names)
     in_channels = train_dataset[0]['image'].shape[0]
     args.in_channels = in_channels
-    
+
     valid_dataset = load_dataset(
         path = 'dataset.py',
         test_mode = False,
