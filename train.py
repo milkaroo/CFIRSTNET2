@@ -93,18 +93,31 @@ if __name__ == '__main__':
     else:
         raise ValueError('Invalid interpolation method')
     
-    if args.use_gpu:
+    # if args.use_gpu:
+    #     device = torch.device(f'cuda:{args.gpu}')
+    # else:
+    #     device = torch.device('cpu')
+
+    # if args.use_gpu:
+    #     torch.cuda.set_device(args.gpu)
+
+    #     cudnn.enabled = True
+    #     cudnn.benchmark = True
+    #     cuda.matmul.allow_tf32 = True
+    #     cudnn.allow_tf32 = True
+        
+    if args.use_gpu and torch.cuda.is_available():
         device = torch.device(f'cuda:{args.gpu}')
-    else:
-        device = torch.device('cpu')
-
-    if args.use_gpu:
         torch.cuda.set_device(args.gpu)
-
+    
         cudnn.enabled = True
         cudnn.benchmark = True
         cuda.matmul.allow_tf32 = True
         cudnn.allow_tf32 = True
+    else:
+        print("GPU not available. Falling back to CPU.")
+        device = torch.device('cpu')
+        args.use_gpu = False  # 이후 AMP 등에서 참조할 경우 대비
 
     if args.wandb:
         wandb.init(project=args.project, name=args.name, save_code=True)
