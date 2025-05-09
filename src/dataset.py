@@ -41,13 +41,14 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
     ]
     
     def _info(self):
-        in_chans = 3 + 9 + 7 + 7
-
+        #in_chans = 3 + 9 + 7 + 7
+        in_chans = 9 + 7 + 7
+        
         features = datasets.Features({
             'data_idx': datasets.Value('string'),
             'H': datasets.Value('int32'),
             'W': datasets.Value('int32'),
-            'image': datasets.Array3D((in_chans, self.config.img_size, self.config.img_size), dtype='float32'),
+            #'image': datasets.Array3D((in_chans, self.config.img_size, self.config.img_size), dtype='float32'),
             'ir_drop': datasets.Array2D((None, 1), dtype='float32'),
         })
 
