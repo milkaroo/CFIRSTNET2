@@ -79,7 +79,7 @@ if __name__ == '__main__':
     if len(metal_orient) != metal_num or metal_orient.count(0) > 0:
         raise ValueError('Invalid metal definition')
 
-    #in_channels = args.use_PDN + args.use_dist + args.use_current + args.use_HIRD * (metal_num * 2 - 1) + args.use_WR * (metal_num * 2 - 3) + args.use_RD * (metal_num * 2 - 3)
+    in_channels = args.use_HIRD * (metal_num * 2 - 1) + args.use_WR * (metal_num * 2 - 3) + args.use_RD * (metal_num * 2 - 3)
     
     if args.interpolation == 'area':
         interpolation = cv2.INTER_AREA
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     )
     train_dataset = train_dataset.with_format('numpy')
     train_dataset = train_dataset.map(data_mapping, batched=True, batch_size=1, num_proc=args.num_workers, remove_columns=train_dataset.column_names)
-    in_channels = train_dataset[0]['image'].shape[0]
+    #in_channels = train_dataset[0]['image'].shape[0]
     args.in_channels = in_channels
 
     valid_dataset = load_dataset(
