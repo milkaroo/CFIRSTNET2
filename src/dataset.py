@@ -57,31 +57,31 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
        
     def _split_generators(self, dl_manager):
         test_idx = []
-        test_cur = []
-        test_pdn = []
-        test_dist = []
+        # test_cur = []
+        # test_pdn = []
+        # test_dist = []
         test_ir_drop = []
         test_netlist = []
         
         real_idx = []
-        real_cur = []
-        real_pdn = []
-        real_dist = []
+        # real_cur = []
+        # real_pdn = []
+        # real_dist = []
         real_ir_drop = []
         real_netlist = []
         
         fake_idx = []
-        fake_cur = []
-        fake_pdn = []
-        fake_dist = []
+        # fake_cur = []
+        # fake_pdn = []
+        # fake_dist = []
         fake_ir_drop = []
         fake_netlist = []
         
 
         BeGAN_02_idx = []
-        BeGAN_02_cur = []
-        BeGAN_02_pdn = []
-        BeGAN_02_dist = []
+        # BeGAN_02_cur = []
+        # BeGAN_02_pdn = []
+        # BeGAN_02_dist = []
         BeGAN_02_ir_drop = []
         BeGAN_02_netlist = []
         
@@ -112,20 +112,20 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
             data_path = glob.glob(os.path.join(path, '*.*'))
             
             for data in data_path:
-                if 'current_map.csv' in os.path.basename(data):
-                    test_cur.append(data)
-                elif 'eff_dist_map.csv' in os.path.basename(data):
-                    test_dist.append(data)
-                elif 'ir_drop_map.csv' in os.path.basename(data):
+                # if 'current_map.csv' in os.path.basename(data):
+                #     test_cur.append(data)
+                # elif 'eff_dist_map.csv' in os.path.basename(data):
+                #     test_dist.append(data)
+                if 'ir_drop_map.csv' in os.path.basename(data):
                     test_ir_drop.append(data)
-                elif 'pdn_density.csv' in os.path.basename(data):
-                    test_pdn.append(data)
+                # elif 'pdn_density.csv' in os.path.basename(data):
+                #     test_pdn.append(data)
                 elif 'netlist.sp' in os.path.basename(data):
                     test_netlist.append(data)
                 else:
                     raise AssertionError(os.path.basename(data), 'test data path error')
                 
-            assert len(test_idx) == len(test_cur) == len(test_dist) == len(test_ir_drop) == len(test_pdn) == len(test_netlist), f'{(len(test_idx), len(test_cur), len(test_dist), len(test_ir_drop), len(test_pdn), len(test_netlist))} test data length not the same'
+            assert len(test_idx) == len(test_ir_drop) == len(test_netlist), f'{(len(test_idx), len(test_ir_drop), len(test_netlist))} test data length not the same'
         
         # for real
         if not self.config.test_mode:
@@ -135,20 +135,20 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                 data_path = glob.glob(os.path.join(path, '*.*'))
                 
                 for data in data_path:
-                    if 'current_map.csv' in os.path.basename(data):
-                        real_cur.append(data)
-                    elif 'eff_dist_map.csv' in os.path.basename(data):
-                        real_dist.append(data)
-                    elif 'ir_drop_map.csv' in os.path.basename(data):
+                    # if 'current_map.csv' in os.path.basename(data):
+                    #     real_cur.append(data)
+                    # elif 'eff_dist_map.csv' in os.path.basename(data):
+                    #     real_dist.append(data)
+                    if 'ir_drop_map.csv' in os.path.basename(data):
                         real_ir_drop.append(data)
-                    elif 'pdn_density.csv' in os.path.basename(data):
-                        real_pdn.append(data)
+                    # elif 'pdn_density.csv' in os.path.basename(data):
+                    #     real_pdn.append(data)
                     elif 'netlist.sp' in os.path.basename(data):
                         real_netlist.append(data)
                     else:
                         raise AssertionError(os.path.basename(data), 'real data path error')
                     
-            assert len(real_idx) == len(real_cur) == len(real_dist) == len(real_ir_drop) == len(real_pdn) == len(real_netlist), f'{(len(real_idx), len(real_cur), len(real_dist), len(real_ir_drop), len(real_pdn), len(real_netlist))} real data length not the same'
+            assert len(real_idx) == len(real_ir_drop) == len(real_netlist), f'{(len(real_idx), len(real_ir_drop), len(real_netlist))} real data length not the same'
         
         # for fake
         if not self.config.test_mode:
@@ -158,20 +158,20 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                 data_path = glob.glob(os.path.join(os.path.dirname(path), data_idx + '*.*'))
 
                 for data in data_path:
-                    if 'current.csv' in os.path.basename(data):
-                        fake_cur.append(data)
-                    elif 'eff_dist.csv' in os.path.basename(data):
-                        fake_dist.append(data)
-                    elif 'ir_drop.csv' in os.path.basename(data):
+                    # if 'current.csv' in os.path.basename(data):
+                    #     fake_cur.append(data)
+                    # elif 'eff_dist.csv' in os.path.basename(data):
+                    #     fake_dist.append(data)
+                    if 'ir_drop.csv' in os.path.basename(data):
                         fake_ir_drop.append(data)
-                    elif 'pdn_density.csv' in os.path.basename(data):
-                        fake_pdn.append(data)
+                    # elif 'pdn_density.csv' in os.path.basename(data):
+                    #     fake_pdn.append(data)
                     elif '.sp' in os.path.basename(data):
                         fake_netlist.append(data)
                     else:
                         raise AssertionError(os.path.basename(data), 'fake data path error')
 
-            assert len(fake_idx) == len(fake_cur) == len(fake_dist) == len(fake_ir_drop) == len(fake_pdn) == len(fake_netlist), f'{(len(fake_idx), len(fake_cur), len(fake_dist), len(fake_ir_drop), len(fake_pdn), len(fake_netlist))} fake data length not the same'
+            assert len(fake_idx) == len(fake_ir_drop) == len(fake_netlist), f'{(len(fake_idx), len(fake_ir_drop), len(fake_netlist))} fake data length not the same'
 
         if self.config.use_BeGAN and not self.config.test_mode:
             
@@ -182,29 +182,29 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                 data_path = glob.glob(os.path.join(os.path.dirname(path), data_idx + '*.*'))
 
                 for data in data_path:
-                    if 'current.csv' in os.path.basename(data):
-                        BeGAN_02_cur.append(data)
-                    elif 'eff_dist.csv' in os.path.basename(data):
-                        BeGAN_02_dist.append(data)
-                    elif 'voltage.csv' in os.path.basename(data):
+                    # if 'current.csv' in os.path.basename(data):
+                    #     BeGAN_02_cur.append(data)
+                    # elif 'eff_dist.csv' in os.path.basename(data):
+                    #     BeGAN_02_dist.append(data)
+                    if 'voltage.csv' in os.path.basename(data):
                         BeGAN_02_ir_drop.append(data)
-                    elif 'regions.csv' in os.path.basename(data):
-                        BeGAN_02_pdn.append(data)
+                    # elif 'regions.csv' in os.path.basename(data):
+                    #     BeGAN_02_pdn.append(data)
                     elif '.sp' in os.path.basename(data):
                         BeGAN_02_netlist.append(data)
                     else:
                         raise AssertionError(os.path.basename(data), 'BeGAN-ver01 data path error')
 
-            assert len(BeGAN_02_idx) == len(BeGAN_02_cur) == len(BeGAN_02_dist) == len(BeGAN_02_ir_drop) == len(BeGAN_02_pdn) == len(BeGAN_02_netlist), f'{(len(BeGAN_02_idx), len(BeGAN_02_cur), len(BeGAN_02_dist), len(BeGAN_02_ir_drop), len(BeGAN_02_pdn), len(BeGAN_02_netlist))} BeGAN-ver01 data length not the same'
+            assert len(BeGAN_02_idx) == len(BeGAN_02_ir_drop) == len(BeGAN_02_netlist), f'{(len(BeGAN_02_idx), len(BeGAN_02_ir_drop), len(BeGAN_02_netlist))} BeGAN-ver01 data length not the same'
         
         if self.config.test_mode:
             return [datasets.SplitGenerator(
                     name=datasets.Split('test'),
                     gen_kwargs={
                         'data_idx': test_idx,
-                        'current': test_cur,
-                        'pdn_density': test_pdn,
-                        'eff_dist': test_dist,
+                        # 'current': test_cur,
+                        # 'pdn_density': test_pdn,
+                        # 'eff_dist': test_dist,
                         'ir_drop': test_ir_drop,
                         'netlist': test_netlist,
                     })]
@@ -213,9 +213,9 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split('BeGAN_02'),
                     gen_kwargs={
                         'data_idx': BeGAN_02_idx,
-                        'current': BeGAN_02_cur,
-                        'pdn_density': BeGAN_02_pdn,
-                        'eff_dist': BeGAN_02_dist,
+                        # 'current': BeGAN_02_cur,
+                        # 'pdn_density': BeGAN_02_pdn,
+                        # 'eff_dist': BeGAN_02_dist,
                         'ir_drop': BeGAN_02_ir_drop,
                         'netlist': BeGAN_02_netlist,
                     })
@@ -224,9 +224,9 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split('fake'),
                     gen_kwargs={
                         'data_idx': fake_idx,
-                        'current': fake_cur,
-                        'pdn_density': fake_pdn,
-                        'eff_dist': fake_dist,
+                        # 'current': fake_cur,
+                        # 'pdn_density': fake_pdn,
+                        # 'eff_dist': fake_dist,
                         'ir_drop': fake_ir_drop,
                         'netlist': fake_netlist,
                     })
@@ -234,9 +234,9 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split('real'),
                     gen_kwargs={
                         'data_idx': real_idx,
-                        'current': real_cur,
-                        'pdn_density': real_pdn,
-                        'eff_dist': real_dist,
+                        # 'current': real_cur,
+                        # 'pdn_density': real_pdn,
+                        # 'eff_dist': real_dist,
                         'ir_drop': real_ir_drop,
                         'netlist': real_netlist,
                     })
@@ -244,19 +244,19 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split('test'),
                     gen_kwargs={
                         'data_idx': test_idx,
-                        'current': test_cur,
-                        'pdn_density': test_pdn,
-                        'eff_dist': test_dist,
+                        # 'current': test_cur,
+                        # 'pdn_density': test_pdn,
+                        # 'eff_dist': test_dist,
                         'ir_drop': test_ir_drop,
                         'netlist': test_netlist,
                     })
                 ]
     
-    def _generate_examples(self, data_idx, current, pdn_density, eff_dist, ir_drop, netlist):
+    def _generate_examples(self, data_idx, ir_drop, netlist):
         self.preprocess = ICCAD_Data(
             img_size = self.config.img_size,
             interpolation = self.config.interpolation,
         )
         
-        for idx, (_data_idx, _current, _pdn_density, _eff_dist, _ir_drop, _netlist) in enumerate(zip(data_idx, current, pdn_density, eff_dist, ir_drop, netlist)):
-            yield idx, self.preprocess.generate_example(_data_idx, _current, _pdn_density, _eff_dist, _ir_drop, _netlist)
+        for idx, (_data_idx, _ir_drop, _netlist) in enumerate(zip(data_idx, ir_drop, netlist)):
+            yield idx, self.preprocess.generate_example(_data_idx, _ir_drop, _netlist)
