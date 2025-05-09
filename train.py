@@ -29,14 +29,14 @@ if __name__ == '__main__':
     parser.add_argument('--name', type=str, default='convnextv2_tiny_CF_BeGAN', help='experiemnt name')
 
     parser.add_argument('--epochs', type=int, default=100, help='number of training epochs')
-    #parser.add_argument('--use_BeGAN', type=bool, default=True, help='use BeGAN dataset')
+    parser.add_argument('--use_BeGAN', type=bool, default=True, help='use BeGAN dataset')
 
-    parser.add_argument('--img_size', type=int, default=384, help='image size')
+    parser.add_argument('--img_size', type=int, default=256, help='image size')
     parser.add_argument('--interpolation', type=str, default='area', help='interpolation method, options:[area, linear, cubic, nearest]')
 
-    parser.add_argument('--use_PDN', type=bool, default=False, help='use PDN density map')
-    parser.add_argument('--use_dist', type=bool, default=False, help='use effective distance map')
-    parser.add_argument('--use_current', type=bool, default=False, help='use current map')
+    # parser.add_argument('--use_PDN', type=bool, default=False, help='use PDN density map')
+    # parser.add_argument('--use_dist', type=bool, default=False, help='use effective distance map')
+    # parser.add_argument('--use_current', type=bool, default=False, help='use current map')
     parser.add_argument('--use_HIRD', type=bool, default=True, help='use Hypothetical IR Drop map')
     parser.add_argument('--use_WR', type=bool, default=True, help='use Wire Resistance map')
     parser.add_argument('--use_RD', type=bool, default=True, help='use Resistive Distance map')
@@ -81,7 +81,6 @@ if __name__ == '__main__':
 
     #in_channels = args.use_PDN + args.use_dist + args.use_current + args.use_HIRD * (metal_num * 2 - 1) + args.use_WR * (metal_num * 2 - 3) + args.use_RD * (metal_num * 2 - 3)
     
-
     if args.interpolation == 'area':
         interpolation = cv2.INTER_AREA
     elif args.interpolation == 'linear':
@@ -93,31 +92,31 @@ if __name__ == '__main__':
     else:
         raise ValueError('Invalid interpolation method')
     
-    # if args.use_gpu:
-    #     device = torch.device(f'cuda:{args.gpu}')
-    # else:
-    #     device = torch.device('cpu')
-
-    # if args.use_gpu:
-    #     torch.cuda.set_device(args.gpu)
-
-    #     cudnn.enabled = True
-    #     cudnn.benchmark = True
-    #     cuda.matmul.allow_tf32 = True
-    #     cudnn.allow_tf32 = True
-        
-    if args.use_gpu and torch.cuda.is_available():
+    if args.use_gpu:
         device = torch.device(f'cuda:{args.gpu}')
+    else:
+        device = torch.device('cpu')
+
+    if args.use_gpu:
         torch.cuda.set_device(args.gpu)
-    
+
         cudnn.enabled = True
         cudnn.benchmark = True
         cuda.matmul.allow_tf32 = True
         cudnn.allow_tf32 = True
-    else:
-        print("GPU not available. Falling back to CPU.")
-        device = torch.device('cpu')
-        args.use_gpu = False  # 이후 AMP 등에서 참조할 경우 대비
+        
+    # if args.use_gpu and torch.cuda.is_available():
+    #     device = torch.device(f'cuda:{args.gpu}')
+    #     torch.cuda.set_device(args.gpu)
+    
+    #     cudnn.enabled = True
+    #     cudnn.benchmark = True
+    #     cuda.matmul.allow_tf32 = True
+    #     cudnn.allow_tf32 = True
+    # else:
+    #     print("GPU not available. Falling back to CPU.")
+    #     device = torch.device('cpu')
+    #     args.use_gpu = False  # 이후 AMP 등에서 참조할 경우 대비
 
     if args.wandb:
         wandb.init(project=args.project, name=args.name, save_code=True)
@@ -129,7 +128,7 @@ if __name__ == '__main__':
     train_dataset = load_dataset(
         path = 'dataset.py',
         test_mode = False,
-        #use_BeGAN = args.use_BeGAN,
+        use_BeGAN = args.use_BeGAN,
         
         img_size = args.img_size,
         interpolation = interpolation,
@@ -148,7 +147,7 @@ if __name__ == '__main__':
     valid_dataset = load_dataset(
         path = 'dataset.py',
         test_mode = False,
-        #use_BeGAN = args.use_BeGAN,
+        use_BeGAN = args.use_BeGAN,
         
         img_size = args.img_size,
         interpolation = interpolation,
@@ -166,7 +165,7 @@ if __name__ == '__main__':
     test_dataset = load_dataset(
         path = 'dataset.py',
         test_mode = False,
-        #use_BeGAN = args.use_BeGAN,
+        use_BeGAN = args.use_BeGAN,
         
         img_size = args.img_size,
         interpolation = interpolation,
@@ -186,7 +185,9 @@ if __name__ == '__main__':
         print('Load cache Successfully')
     except:
         #min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[in_channels, 1], data_keys=['image', 'ir_drop'])
-        min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[train_dataset[0]['image'].shape[0], 1], data_keys=['image', 'ir_drop'])
+        #min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[train_dataset[0]['image'].shape[0], 1], data_keys=['ir_drop'])
+        min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[1], data_keys=['ir_drop'])
+        
         with open('min_max_mean_std.cache', 'wb') as f:
             pickle.dump((min, max, mean, std), f)
 
