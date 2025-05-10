@@ -184,9 +184,9 @@ if __name__ == '__main__':
             min, max, mean, std = pickle.load(f)
         print('Load cache Successfully')
     except:
-        #min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[in_channels, 1], data_keys=['image', 'ir_drop'])
-        #min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[train_dataset[0]['image'].shape[0], 1], data_keys=['ir_drop'])
-        min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[1], data_keys=['ir_drop'])
+        min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[in_channels, 1], data_keys=['image', 'ir_drop'])
+        min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[train_dataset[0]['image'].shape[0], 1], data_keys=['ir_drop'])
+        #min, max, mean, std = get_min_max_mean_std(train_dataset, in_chs=[1], data_keys=['ir_drop'])
         
         with open('min_max_mean_std.cache', 'wb') as f:
             pickle.dump((min, max, mean, std), f)
