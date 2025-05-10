@@ -49,7 +49,7 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
             'data_idx': datasets.Value('string'),
             'H': datasets.Value('int32'),
             'W': datasets.Value('int32'),
-            #'image': datasets.Array3D((in_chans, self.config.img_size, self.config.img_size), dtype='float32'),
+            'image': datasets.Array3D((in_chans, self.config.img_size, self.config.img_size), dtype='float32'),
             'ir_drop': datasets.Array2D((None, 1), dtype='float32'),
         })
 
