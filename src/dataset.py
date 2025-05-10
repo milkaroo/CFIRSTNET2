@@ -9,7 +9,8 @@ from src.data_preprocess import ICCAD_Data
 
 pd.options.mode.chained_assignment = None
 
-_REPO = 'https://huggingface.co/datasets/DaJhuan/ICCAD/resolve/main'
+#_REPO = 'https://huggingface.co/datasets/DaJhuan/ICCAD/resolve/main'
+_REPO = 'https://huggingface.co/datasets/milkaroo0/CFIRSTNET_dataset/tree/main'
 
 _URLS = {
     'fake_data_url': f'{_REPO}/fake-circuit-data_20230623.zip',
