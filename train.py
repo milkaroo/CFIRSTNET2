@@ -135,7 +135,7 @@ if __name__ == '__main__':
         
         split = 'fake+BeGAN_02',
         num_proc = args.num_workers,
-        keep_in_memory = False,
+        keep_in_memory = True,
         writer_batch_size = 10,
         trust_remote_code=True,
     )
@@ -154,7 +154,7 @@ if __name__ == '__main__':
         
         split = 'real',
         num_proc = args.num_workers,
-        keep_in_memory = False,
+        keep_in_memory = True,
         writer_batch_size = 10,
         trust_remote_code=True,
     )
@@ -172,7 +172,7 @@ if __name__ == '__main__':
     
         split = 'test',
         num_proc = args.num_workers,
-        keep_in_memory = False,
+        keep_in_memory = True,
         writer_batch_size = 10,
         trust_remote_code=True,
     )
