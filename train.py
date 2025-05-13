@@ -60,7 +60,7 @@ if __name__ == '__main__':
     parser.add_argument('--eval_batch_size', type=int, default=10, help='evaluation batch size')
     parser.add_argument('--gradient_accumulation', type=int, default=100, help='gradient accumulation steps')
 
-    parser.add_argument('--num_workers', type=int, default=8, help='number of workers')
+    parser.add_argument('--num_workers', type=int, default=1, help='number of workers')
     parser.add_argument('--use_amp', type=bool, default=True, help='use automatic mixed precision')
     parser.add_argument('--use_gpu', type=bool, default=True, help='use gpu')
     parser.add_argument('--gpu', type=int, default=0, help='gpu device')
