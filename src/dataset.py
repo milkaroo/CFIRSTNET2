@@ -103,7 +103,7 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
             #BeGAN_01_data_files = os.path.join(dl_manager.download_and_extract(_URLS['BeGAN_01_data_url']), 'BeGAN-ver01')
             #BeGAN_01_path_files = sorted(glob.glob(os.path.join(BeGAN_01_data_files, '*.sp')))
 
-            BeGAN_02_data_files = os.path.join(dl_manager.download_and_extract(_URLS['BeGAN_02_data_url']), 'BeGAN-ver02')
+            BeGAN_02_data_files = os.path.join(dl_manager.download_and_extract(_URLS['BeGAN_02_data_url']), 'BeGAN-ver02_half')
             BeGAN_02_path_files = sorted(glob.glob(os.path.join(BeGAN_02_data_files, '*.sp')))
             #BeGAN_02_path_files = sorted(glob.glob(os.path.join(BeGAN_02_data_files, '*.sp')))[:200]  # 최대 300개만 사용
             
