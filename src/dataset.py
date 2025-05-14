@@ -59,31 +59,18 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
        
     def _split_generators(self, dl_manager):
         test_idx = []
-        # test_cur = []
-        # test_pdn = []
-        # test_dist = []
         test_ir_drop = []
         test_netlist = []
         
         real_idx = []
-        # real_cur = []
-        # real_pdn = []
-        # real_dist = []
         real_ir_drop = []
         real_netlist = []
         
         fake_idx = []
-        # fake_cur = []
-        # fake_pdn = []
-        # fake_dist = []
         fake_ir_drop = []
         fake_netlist = []
         
-
         BeGAN_02_idx = []
-        # BeGAN_02_cur = []
-        # BeGAN_02_pdn = []
-        # BeGAN_02_dist = []
         BeGAN_02_ir_drop = []
         BeGAN_02_netlist = []
         
@@ -114,14 +101,8 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
             data_path = glob.glob(os.path.join(path, '*.*'))
             
             for data in data_path:
-                # if 'current_map.csv' in os.path.basename(data):
-                #     test_cur.append(data)
-                # elif 'eff_dist_map.csv' in os.path.basename(data):
-                #     test_dist.append(data)
                 if 'ir_drop_map.csv' in os.path.basename(data):
                     test_ir_drop.append(data)
-                # elif 'pdn_density.csv' in os.path.basename(data):
-                #     test_pdn.append(data)
                 elif 'netlist.sp' in os.path.basename(data):
                     test_netlist.append(data)
                 else:
@@ -137,14 +118,8 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                 data_path = glob.glob(os.path.join(path, '*.*'))
                 
                 for data in data_path:
-                    # if 'current_map.csv' in os.path.basename(data):
-                    #     real_cur.append(data)
-                    # elif 'eff_dist_map.csv' in os.path.basename(data):
-                    #     real_dist.append(data)
                     if 'ir_drop_map.csv' in os.path.basename(data):
                         real_ir_drop.append(data)
-                    # elif 'pdn_density.csv' in os.path.basename(data):
-                    #     real_pdn.append(data)
                     elif 'netlist.sp' in os.path.basename(data):
                         real_netlist.append(data)
                     else:
@@ -160,14 +135,8 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                 data_path = glob.glob(os.path.join(os.path.dirname(path), data_idx + '*.*'))
 
                 for data in data_path:
-                    # if 'current.csv' in os.path.basename(data):
-                    #     fake_cur.append(data)
-                    # elif 'eff_dist.csv' in os.path.basename(data):
-                    #     fake_dist.append(data)
                     if 'ir_drop.csv' in os.path.basename(data):
                         fake_ir_drop.append(data)
-                    # elif 'pdn_density.csv' in os.path.basename(data):
-                    #     fake_pdn.append(data)
                     elif '.sp' in os.path.basename(data):
                         fake_netlist.append(data)
                     else:
@@ -184,14 +153,8 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                 data_path = glob.glob(os.path.join(os.path.dirname(path), data_idx + '*.*'))
 
                 for data in data_path:
-                    # if 'current.csv' in os.path.basename(data):
-                    #     BeGAN_02_cur.append(data)
-                    # elif 'eff_dist.csv' in os.path.basename(data):
-                    #     BeGAN_02_dist.append(data)
                     if 'voltage.csv' in os.path.basename(data):
                         BeGAN_02_ir_drop.append(data)
-                    # elif 'regions.csv' in os.path.basename(data):
-                    #     BeGAN_02_pdn.append(data)
                     elif '.sp' in os.path.basename(data):
                         BeGAN_02_netlist.append(data)
                     else:
@@ -204,9 +167,6 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split('test'),
                     gen_kwargs={
                         'data_idx': test_idx,
-                        # 'current': test_cur,
-                        # 'pdn_density': test_pdn,
-                        # 'eff_dist': test_dist,
                         'ir_drop': test_ir_drop,
                         'netlist': test_netlist,
                     })]
@@ -215,9 +175,6 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split('BeGAN_02'),
                     gen_kwargs={
                         'data_idx': BeGAN_02_idx,
-                        # 'current': BeGAN_02_cur,
-                        # 'pdn_density': BeGAN_02_pdn,
-                        # 'eff_dist': BeGAN_02_dist,
                         'ir_drop': BeGAN_02_ir_drop,
                         'netlist': BeGAN_02_netlist,
                     })
@@ -226,9 +183,6 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split('fake'),
                     gen_kwargs={
                         'data_idx': fake_idx,
-                        # 'current': fake_cur,
-                        # 'pdn_density': fake_pdn,
-                        # 'eff_dist': fake_dist,
                         'ir_drop': fake_ir_drop,
                         'netlist': fake_netlist,
                     })
@@ -236,9 +190,6 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split('real'),
                     gen_kwargs={
                         'data_idx': real_idx,
-                        # 'current': real_cur,
-                        # 'pdn_density': real_pdn,
-                        # 'eff_dist': real_dist,
                         'ir_drop': real_ir_drop,
                         'netlist': real_netlist,
                     })
@@ -246,9 +197,6 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                     name=datasets.Split('test'),
                     gen_kwargs={
                         'data_idx': test_idx,
-                        # 'current': test_cur,
-                        # 'pdn_density': test_pdn,
-                        # 'eff_dist': test_dist,
                         'ir_drop': test_ir_drop,
                         'netlist': test_netlist,
                     })
