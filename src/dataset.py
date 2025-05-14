@@ -4,6 +4,7 @@ import datasets
 import pandas as pd
 from dataclasses import dataclass
 import cv2
+import gc 
 
 from src.data_preprocess import ICCAD_Data
 
@@ -40,7 +41,15 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
             description='CFIRSTNET: Comprehensive Features for Static IR Drop Estimation with Neural Network',
         )
     ]
-    
+    ######################
+    def __init__(self, *args, **kwargs):
+        super(ICCAD_Dataset, self).__init__(*args, **kwargs)
+        self.batch_size = 200  # batch size
+        self.preprocess = ICCAD_Data(
+            img_size=self.config.img_size,
+            interpolation=self.config.interpolation
+        )
+    ######################
     def _info(self):
         #in_chans = 3 + 9 + 7 + 7
         in_chans = 9 + 7 + 7
@@ -203,10 +212,26 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
                 ]
     
     def _generate_examples(self, data_idx, ir_drop, netlist):
+        num_examples = len(data_idx)
         self.preprocess = ICCAD_Data(
             img_size = self.config.img_size,
             interpolation = self.config.interpolation,
         )
+        for start_idx in range(0, num_examples, self.batch_size):
+            # 배치 단위로 처리
+            end_idx = min(start_idx + self.batch_size, num_examples)
+            batch_data_idx = data_idx[start_idx:end_idx]
+            batch_ir_drop = ir_drop[start_idx:end_idx]
+            batch_netlist = netlist[start_idx:end_idx]
+
+            # 각 배치에 대해 예시를 생성
+            for idx, (_data_idx, _ir_drop, _netlist) in enumerate(zip(batch_data_idx, batch_ir_drop, batch_netlist)):
+                example = self.preprocess.generate_example(_data_idx, _ir_drop, _netlist)
+                yield start_idx + idx, example
+
+        # for idx, (_data_idx, _ir_drop, _netlist) in enumerate(zip(data_idx, ir_drop, netlist)):
+        #     yield idx, self.preprocess.generate_example(_data_idx, _ir_drop, _netlist)
         
-        for idx, (_data_idx, _ir_drop, _netlist) in enumerate(zip(data_idx, ir_drop, netlist)):
-            yield idx, self.preprocess.generate_example(_data_idx, _ir_drop, _netlist)
+                # 배치 처리 후 메모리에서 제거
+                del batch_data_idx, batch_ir_drop, batch_netlist
+                gc.collect()
