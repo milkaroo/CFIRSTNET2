@@ -49,6 +49,7 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
             img_size=self.config.img_size,
             interpolation=self.config.interpolation
         )
+        self.download_batch_size = 200  # 배치 크기로 다운로드 처리
     ######################
     def _info(self):
         #in_chans = 3 + 9 + 7 + 7
@@ -82,7 +83,13 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
         BeGAN_02_idx = []
         BeGAN_02_ir_drop = []
         BeGAN_02_netlist = []
-        
+
+        # 배치 단위로 다운로드 처리
+        def download_batch_data(url, batch_size, start_idx):
+            files = dl_manager.download_and_extract(url)
+            path_files = sorted(glob.glob(os.path.join(files, '*.sp')))
+            return path_files[start_idx:start_idx + batch_size]
+
         # Download images
         test_data_files = os.path.join(dl_manager.download_and_extract(_URLS['test_data_url']), 'hidden-real-circuit-data')
         test_path_files = sorted(glob.glob(os.path.join(test_data_files, '*')))
@@ -99,8 +106,9 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
             #BeGAN_01_data_files = os.path.join(dl_manager.download_and_extract(_URLS['BeGAN_01_data_url']), 'BeGAN-ver01')
             #BeGAN_01_path_files = sorted(glob.glob(os.path.join(BeGAN_01_data_files, '*.sp')))
 
-            BeGAN_02_data_files = os.path.join(dl_manager.download_and_extract(_URLS['BeGAN_02_data_url']), 'BeGAN-ver02_half')
-            BeGAN_02_path_files = sorted(glob.glob(os.path.join(BeGAN_02_data_files, '*.sp')))
+            #BeGAN_02_data_files = os.path.join(dl_manager.download_and_extract(_URLS['BeGAN_02_data_url']), 'BeGAN-ver02_half')
+            #BeGAN_02_path_files = sorted(glob.glob(os.path.join(BeGAN_02_data_files, '*.sp')))
+            BeGAN_02_path_files = download_batch_data(_URLS['BeGAN_02_data_url'], self.download_batch_size)
             #BeGAN_02_path_files = sorted(glob.glob(os.path.join(BeGAN_02_data_files, '*.sp')))[:200]  # 최대 300개만 사용
             
         # for test
@@ -154,20 +162,21 @@ class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
             assert len(fake_idx) == len(fake_ir_drop) == len(fake_netlist), f'{(len(fake_idx), len(fake_ir_drop), len(fake_netlist))} fake data length not the same'
 
         if self.config.use_BeGAN and not self.config.test_mode:
-            
-            # for BeGAN-ver02
-            for path in BeGAN_02_path_files:
-                data_idx = os.path.basename(path).split('.')[0]
-                BeGAN_02_idx.append(data_idx)
-                data_path = glob.glob(os.path.join(os.path.dirname(path), data_idx + '*.*'))
+            for i in range(0, len(BeGAN_02_path_files), self.download_batch_size):
+                BeGAN_02_batch = BeGAN_02_path_files[i:i + self.download_batch_size]
+                # for BeGAN-ver02
+                for path in BeGAN_02_batch:
+                    data_idx = os.path.basename(path).split('.')[0]
+                    BeGAN_02_idx.append(data_idx)
+                    data_path = glob.glob(os.path.join(os.path.dirname(path), data_idx + '*.*'))
 
-                for data in data_path:
-                    if 'voltage.csv' in os.path.basename(data):
-                        BeGAN_02_ir_drop.append(data)
-                    elif '.sp' in os.path.basename(data):
-                        BeGAN_02_netlist.append(data)
-                    else:
-                        raise AssertionError(os.path.basename(data), 'BeGAN-ver01 data path error')
+                    for data in data_path:
+                        if 'voltage.csv' in os.path.basename(data):
+                            BeGAN_02_ir_drop.append(data)
+                        elif '.sp' in os.path.basename(data):
+                            BeGAN_02_netlist.append(data)
+                        else:
+                            raise AssertionError(os.path.basename(data), 'BeGAN-ver01 data path error')
 
             assert len(BeGAN_02_idx) == len(BeGAN_02_ir_drop) == len(BeGAN_02_netlist), f'{(len(BeGAN_02_idx), len(BeGAN_02_ir_drop), len(BeGAN_02_netlist))} BeGAN-ver01 data length not the same'
         
