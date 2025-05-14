@@ -188,9 +188,6 @@ if __name__ == '__main__':
         with open('min_max_mean_std.cache', 'wb') as f:
             pickle.dump((min, max, mean, std), f)
 
-    print("mean keys:", mean.keys())  # dict_keys(['ir_drop'])
-    print("std keys:", std.keys())    # dict_keys(['ir_drop'])
-
     train_ds = train_dataset.with_format('numpy')
     valid_ds = valid_dataset.with_format('numpy')
     test_ds  = test_dataset.with_format('numpy')
