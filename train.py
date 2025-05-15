@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--train_batch_size', type=int, default=10, help='train batch size')
     parser.add_argument('--eval_batch_size', type=int, default=10, help='evaluation batch size')
-    parser.add_argument('--gradient_accumulation', type=int, default=30, help='gradient accumulation steps') #originall 100
+    parser.add_argument('--gradient_accumulation', type=int, default=100, help='gradient accumulation steps') #originall 100
 
     parser.add_argument('--num_workers', type=int, default=4, help='number of workers')
     parser.add_argument('--use_amp', type=bool, default=True, help='use automatic mixed precision')
