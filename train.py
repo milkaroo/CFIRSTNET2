@@ -133,7 +133,7 @@ if __name__ == '__main__':
         img_size = args.img_size,
         interpolation = interpolation,
         
-        split = 'fake+BeGAN_02',
+        split = 'fake+BeGAN_01+BeGAN_02',
         num_proc = args.num_workers,
         keep_in_memory = False,
         writer_batch_size = 10,
