@@ -20,6 +20,26 @@ def get_exceeding_indices(pred: torch.Tensor, threshold: float = 0.9):
         indices = torch.nonzero(p > t, as_tuple=False)  # (N, 2)
         results.append(indices)
     return results
+    
+def map_to_physical_coordinates(indices, pred_shape, layout_size_um):
+    """
+    indices: torch.Tensor of shape (N, 2), each [y, x]
+    pred_shape: (H, W) shape of prediction tensor
+    layout_size_um: (layout_height_um, layout_width_um)
+    """
+    H, W = pred_shape
+    layout_H, layout_W = layout_size_um
+
+    scale_y = layout_H / H
+    scale_x = layout_W / W
+
+    mapped_coords = []
+    for y, x in indices:
+        Y_um = y.item() * scale_y
+        X_um = x.item() * scale_x
+        mapped_coords.append((Y_um, X_um))
+
+    return mapped_coords
 
 
 def single_f1_score(input, target):
