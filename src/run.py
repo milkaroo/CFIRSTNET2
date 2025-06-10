@@ -219,6 +219,14 @@ def evaluate(args, model, valid_loader, test_loader, mean, std, device):
 
             test_result_save.update(pred, ir_drop, loss.item())
 
+            
+            threshold = 0.9
+            indices_list = get_exceeding_indices(pred, threshold=threshold)
+            for i, indices in enumerate(indices_list):
+                print(f"[Test] Sample {idx * len(image) + i}: {len(indices)} points exceed {threshold * 100:.1f}% of max")
+                if len(indices) > 0:
+                    print(f"  Top 5 positions: {indices[:5].tolist()}")
+
     # get result
     print(f'-------------------- Valid --------------------')
     valid_result_save.print()
