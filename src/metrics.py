@@ -5,6 +5,23 @@ import torch.nn.functional as F
 from torcheval.metrics.functional import binary_f1_score, binary_recall, binary_precision
 from src.transforms import reverse_normalize as reverse_transform
 
+def get_exceeding_indices(pred: torch.Tensor, threshold: float = 0.9):
+    """
+    pred: (B, 1, H, W) or (1, H, W) tensor
+    threshold: 기준 비율 (보통 0.9)
+    return: 예측값이 threshold 이상인 위치 인덱스 리스트
+    """
+    if pred.ndim == 4:  # (B, 1, H, W)
+        pred = pred.squeeze(1)  # -> (B, H, W)
+    
+    results = []
+    for p in pred:
+        t = p.max() * threshold
+        indices = torch.nonzero(p > t, as_tuple=False)  # (N, 2)
+        results.append(indices)
+    return results
+
+
 def single_f1_score(input, target):
     # CHW or HW
     expandedinput = torch.as_tensor(input)
