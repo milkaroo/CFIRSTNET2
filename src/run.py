@@ -10,6 +10,7 @@ import wandb
 from src.transforms import *
 from src.utils import *
 from src.loss import *
+from src.metrics import get_exceeding_indices, map_to_physical_coordinates
 
 def train(args, model, train_loader, valid_loader, test_loader, mean, std, device):
     # loss function
@@ -219,13 +220,22 @@ def evaluate(args, model, valid_loader, test_loader, mean, std, device):
 
             test_result_save.update(pred, ir_drop, loss.item())
 
-            
+            # layout 실제 크기 설정 (예: 2048×2048 um)
+            layout_size_um = (2048, 2048)
             threshold = 0.9
+
             indices_list = get_exceeding_indices(pred, threshold=threshold)
-            for i, indices in enumerate(indices_list):
-                print(f"[Test] Sample {idx * len(image) + i}: {len(indices)} points exceed {threshold * 100:.1f}% of max")
-                if len(indices) > 0:
-                    print(f"  Top 5 positions: {indices[:5].tolist()}")
+
+           for i, indices in enumerate(indices_list):
+               print(f"[Test] Sample {idx * len(image) + i}: {len(indices)} points exceed {threshold*100:.1f}% of max")
+            
+               if len(indices) > 0:
+                   pred_shape = pred.shape[-2:]  # (H, W)
+                   mapped = map_to_physical_coordinates(indices, pred_shape, layout_size_um)
+            
+                   for j, ((y, x), (y_um, x_um)) in enumerate(zip(indices[:5], mapped[:5])):  # 앞 5개만 출력
+                       print(f"  Position {j}: (tensor_y={y.item()}, tensor_x={x.item()}) → (physical_y={y_um:.1f} um, physical_x={x_um:.1f} um)")
+
 
     # get result
     print(f'-------------------- Valid --------------------')
