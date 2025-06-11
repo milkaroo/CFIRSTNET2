@@ -12,7 +12,7 @@ class ICCAD_Data():
     def __init__(
             self, 
             # transform
-            img_size: int = 256,
+            img_size: int = 384,
             interpolation: int = cv2.INTER_AREA,
         ):
         # transform
