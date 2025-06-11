@@ -26,7 +26,7 @@ class ICCAD_Config(datasets.BuilderConfig):
     use_BeGAN: bool = False and not test_mode
     
     # transform
-    img_size: int = 256
+    img_size: int = 384
     interpolation: int = cv2.INTER_AREA
 
 class ICCAD_Dataset(datasets.GeneratorBasedBuilder):
