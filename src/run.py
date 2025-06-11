@@ -220,60 +220,64 @@ def evaluate(args, model, valid_loader, test_loader, mean, std, device):
 
             test_result_save.update(pred, ir_drop, loss.item())
 
-            # layout 실제 크기 설정 (예: 2048×2048 um)
-            layout_size_um = (2048, 2048)
+            
             threshold = 0.9
+            dbu = 2000  # 1 픽셀 = 1μm, → DBU 기준 변환
 
             indices_list = get_exceeding_indices(pred, threshold=threshold)
 
             for i, indices in enumerate(indices_list):
-              print(f"[Test] Sample {idx * len(image) + i}: {len(indices)} points exceed {threshold*100:.1f}% of max")
-              sample_idx = idx * len(image) + i
-              if len(indices) > 0:
-                pred_shape = pred.shape[-2:]  # (H, W)
-                mapped = map_to_physical_coordinates(indices, pred_shape, layout_size_um)
-          
-                # 1️⃣ 위치 로그 저장
-                txt_filename = f"cfirstnet_output_{sample_idx}.txt"
-                with open(txt_filename, "w") as log_file:
-                    for j, ((y, x), (y_um, x_um)) in enumerate(zip(indices, mapped)):
-                        log_file.write(
-                            f"Position: tensor_y={y.item()}, tensor_x={x.item()} → physical_y={y_um:.1f} um, physical_x={x_um:.1f} um\n"
-                        )
-                        if j < 5:
-                            print(f"  Position {j}: (tensor_y={y.item()}, tensor_x={x.item()}) → "
-                                  f"(physical_y={y_um:.1f} um, physical_x={x_um:.1f} um)")
+                print(f"[Test] Sample {idx * len(image) + i}: {len(indices)} points exceed {threshold*100:.1f}% of max")
+                sample_idx = idx * len(image) + i
+                if len(indices) > 0:
+                    pred_shape = pred.shape[-2:]  # (H, W)
 
-                # 2️⃣ 변환 함수 정의
-                def position_to_xmodel(lines):
-                    output_lines = []
-                    idx = 0
-                    for line in lines:
-                        if "physical_x=" in line:
-                            try:
-                                parts = line.strip().split("physical_y=")[1].split(" um, physical_x=")
-                                py = float(parts[0])
-                                px = float(parts[1].replace(" um)", "").replace(" um", ""))
-                                nodename = f"n{int(round(px))}_m{int(round(py))}"
-                                output_lines.append(f"Ihotspot{idx} {nodename} 0 DC 3mA")
-                                idx += 1
-                            except Exception as e:
-                                print("❌ Parse error:", line, e)
-                    return output_lines
+                    # 1️⃣ 픽셀 좌표만 저장 (.txt)
+                    txt_filename = f"cfirstnet_output_{sample_idx}.txt"
+                    with open(txt_filename, "w") as log_file:
+                        for j, (y, x) in enumerate(indices):
+                            log_file.write(f"Position {j}: tensor_y={y.item()}, tensor_x={x.item()}\n")
+                            if j < 5:
+                                print(f"  Position {j}: tensor_y={y.item()}, tensor_x={x.item()}")
 
-                # 3️⃣ 변환 수행
-                with open(txt_filename) as f:
-                    lines = f.readlines()
 
-                xmodel_snippets = position_to_xmodel(lines)
+                    # 2️⃣ 변환 함수 정의 (DBU 적용한 XMODEL 노드)
+                    def position_to_xmodel(lines, dbu=2000):
+                        output_lines = []
+                        idx = 0
+                        for line in lines:
+                            if "tensor_y=" in line and "tensor_x=" in line:
+                                try:
+                                    parts = line.strip().replace("Position: ", "").split(", ")
+                                    py = int(parts[0].split("=")[1])
+                                    px = int(parts[1].split("=")[1])
+                                    py_dbu = py * dbu
+                                    px_dbu = px * dbu
 
-                # 4️⃣ 저장
-                sp_filename = f"hotspots_xmodel_{sample_idx}.sp"
-                with open(sp_filename, "w") as f:
-                    for line in xmodel_snippets:
-                        f.write(line + "\n")
+                                    # 예시 노드명: n1_m1_440000_312000
+                                    nodename = f"n1_m1_{px_dbu}_{py_dbu}"
+                                    output_lines.append(f"Ihotspot{idx} {nodename} 0 DC 3mA")
+                                    idx += 1
+                                except Exception as e:
+                                    print("❌ Parse error:", line, e)
+                        return output_lines
 
-                print(f"✅ XMODEL netlist 파일 생성 완료: {sp_filename}")
+
+
+                    # 3️⃣ 변환 수행
+                    with open(txt_filename) as f:
+                        lines = f.readlines()
+
+                    xmodel_snippets = position_to_xmodel(lines)
+
+                    # 4️⃣ .sp 저장
+                    sp_filename = f"hotspots_xmodel_{sample_idx}.sp"
+                    with open(sp_filename, "w") as f:
+                        for line in xmodel_snippets:
+                            f.write(line + "\n")
+
+                    print(f"✅ XMODEL netlist 파일 생성 완료: {sp_filename}")
+
 
 
     # get result
