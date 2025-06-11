@@ -31,7 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', type=int, default=30, help='number of training epochs') #original 100
     parser.add_argument('--use_BeGAN', type=bool, default=True, help='use BeGAN dataset')
 
-    parser.add_argument('--img_size', type=int, default=256, help='image size')
+    parser.add_argument('--img_size', type=int, default=384, help='image size')
     parser.add_argument('--interpolation', type=str, default='area', help='interpolation method, options:[area, linear, cubic, nearest]')
 
     # parser.add_argument('--use_PDN', type=bool, default=False, help='use PDN density map')
